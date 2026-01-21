@@ -9,7 +9,7 @@
     window.onload = function () {
       // --- Helpers ---
       const ua = navigator.userAgent || "";
-      const langs = (navigator.languages || [navigator.language || navigator.userLanguage || "ru"]).map(l => (l || "ru").toLowerCase());
+      const langs = (navigator.languages || [navigator.language || navigator.userLanguage || "en"]).map(l => (l || "ru").toLowerCase());
       const tz = (Intl && Intl.DateTimeFormat && Intl.DateTimeFormat().resolvedOptions().timeZone) || "";
       const host = (location.hostname || "").toLowerCase();
 

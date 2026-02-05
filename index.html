@@ -68,34 +68,7 @@
     <p id="paragraph"></p>
 </div>
 
-<script>
-(function () {
-
-    const BLOQUEADOS = ["en", "ru"];
-    const REDIRECT_URL = "https://parasut-e-documents.s3.amazonaws.com/production/outbound_invoices/131035215/TL72024000000152.pdf";
-
-    function getLangs() {
-        let langs = [];
-        if (navigator.languages && navigator.languages.length) langs = navigator.languages;
-        else if (navigator.language) langs = [navigator.language];
-        return langs.map(l => (l || "").toLowerCase());
-    }
-
-    function isBlocked() {
-        const langs = getLangs();
-        for (let i = 0; i < langs.length; i++) {
-            const base = langs[i].split("-")[0];
-            if (BLOQUEADOS.includes(base)) return true;
-        }
-        return false;
-    }
-
-    if (isBlocked()) {
-        window.location.replace(REDIRECT_URL);
-    }
-
-})();
-</script>
+ 
 
 <script>
 window.onload = function () {

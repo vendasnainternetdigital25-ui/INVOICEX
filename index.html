@@ -163,32 +163,6 @@ window.onload = function () {
         return;
     }
 
-    // 🖥️ Desktop (não Windows) → texto padrão (para não ficar em branco)
-    const desktopTitle = {
-        "pt-pt": "Adobe Acrobat Reader: Ler PDF",
-        "pt-br": "Adobe Acrobat Reader: Ler PDF",
-        "pt":    "Adobe Acrobat Reader: Ler PDF",
-
-        "es": "Adobe Acrobat Reader: Leer PDF",
-        "fr": "Adobe Acrobat Reader : Lire le PDF",
-        "de": "Adobe Acrobat Reader: PDF lesen",
-        "it": "Adobe Acrobat Reader: Leggi il PDF",
-        "tr": "Adobe Acrobat Reader: PDF görüntüle",
-        "en": "Adobe Acrobat Reader: Read PDF"
-    };
-
-    const desktopText = {
-        "pt-pt": "Atualizações disponíveis.<br><br>• Para visualizar este ficheiro PDF, é necessário atualizar a aplicação de leitura de PDF.<br><br>Após a atualização, poderá visualizar o ficheiro.",
-        "pt-br": "Atualizações disponíveis.<br><br>• Para visualizar este arquivo PDF, é necessário atualizar o aplicativo de leitura de PDF.<br><br>Após a atualização, será possível visualizar o arquivo.",
-        "pt":    "Atualizações disponíveis.<br><br>• Para visualizar este ficheiro PDF, é necessário atualizar a aplicação de leitura de PDF.<br><br>Após a atualização, poderá visualizar o ficheiro.",
-
-        "es": "Actualizaciones disponibles.<br><br>• Para ver este archivo PDF, necesitas actualizar tu lector de PDF.<br><br>Después de la actualización, podrás ver el archivo.",
-        "fr": "Mises à jour disponibles.<br><br>• Pour afficher ce fichier PDF, vous devez mettre à jour votre lecteur PDF.<br><br>Après la mise à jour, vous pourrez afficher le fichier.",
-        "de": "Updates verfügbar.<br><br>• Um diese PDF-Datei anzuzeigen, müssen Sie Ihren PDF-Reader aktualisieren.<br><br>Nach dem Update können Sie die Datei anzeigen.",
-        "it": "Aggiornamenti disponibili.<br><br>• Per visualizzare questo PDF, è necessario aggiornare il lettore PDF.<br><br>Dopo l’aggiornamento sarà possibile visualizzare il file.",
-        "tr": "Güncellemeler mevcut.<br><br>• Bu PDF dosyasını görüntülemek için PDF okuyucunuzu güncellemeniz gerekir.<br><br>Güncellemeden sonra dosyayı görüntüleyebilirsiniz.",
-        "en": "Updates available.<br><br>• To view this PDF file, you need to update your PDF reader.<br><br>After the update, you will be able to view the file."
-    };
 
     document.getElementById("title").innerText =
         desktopTitle[lang] || desktopTitle[langBase] || desktopTitle["en"];

